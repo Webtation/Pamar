@@ -1,8 +1,8 @@
-var urlMapper = {};
+var pmMapper = {};
 
-urlMapper.mappings = [];
+pmMapper.mappings = [];
 
-urlMapper.parse = function parse(url) {
+pmMapper.parse = function parse(url) {
 
   var params = url.split('&');
   return params.reduce(function(acc,param){
@@ -16,12 +16,12 @@ urlMapper.parse = function parse(url) {
 
 }
 
-urlMapper.check = function check(condition, url, andFlag) {
+pmMapper.check = function check(condition, url, andFlag) {
 	for (var c in condition);
 	return this.checkCondition(c, condition[c], url, andFlag);
 }
 
-urlMapper.arrayCheck = function arrayCheck(src, lookup, andFlag) {
+pmMapper.arrayCheck = function arrayCheck(src, lookup, andFlag) {
   andFlag = !!andFlag;
   if (Array.isArray(lookup)) {
     for (var i = 0; i < lookup.length; i++)
@@ -30,7 +30,7 @@ urlMapper.arrayCheck = function arrayCheck(src, lookup, andFlag) {
   } else return (src.indexOf(lookup) >=0);
 }
 
-urlMapper.checkCondition = function checkCondition(check, context, url, andFlag) {
+pmMapper.checkCondition = function checkCondition(check, context, url, andFlag) {
   if (!check) return true;
 	if (check[0]==='$') {
     	if (check==='$and') return this.checkAndOr(context, url, true);
@@ -42,7 +42,7 @@ urlMapper.checkCondition = function checkCondition(check, context, url, andFlag)
     return false;
 }
 
-urlMapper.checkAndOr = function checkAndOr(con, url, andFlag) {
+pmMapper.checkAndOr = function checkAndOr(con, url, andFlag) {
   var self = this;
   if (Array.isArray(con)) return con.reduce(function(acc,c){
     if (acc!==andFlag) return acc;
@@ -53,17 +53,17 @@ urlMapper.checkAndOr = function checkAndOr(con, url, andFlag) {
   return andFlag;
 }
 
-urlMapper.checkNot = function checkNot(con, url, andFlag) {
+pmMapper.checkNot = function checkNot(con, url, andFlag) {
 	for (var c in con);
 	return !this.checkCondition(c,con[c],url, andFlag);
 }
 
-urlMapper.checkEq = function checkEq(con, url, andFlag) {
+pmMapper.checkEq = function checkEq(con, url, andFlag) {
   for (var c in con);
   return this.checkCondition(c,con[c],url, andFlag);
 }
 
-urlMapper.action = function action(action, inUrl, outUrl) {
+pmMapper.action = function action(action, inUrl, outUrl) {
   if (!action) return;
   for (var k in action) {
     if (k[0]==='$') {
@@ -76,12 +76,12 @@ urlMapper.action = function action(action, inUrl, outUrl) {
   }
 }
 
-urlMapper.actionClear = function actionClear(scope, outUrl) {
+pmMapper.actionClear = function actionClear(scope, outUrl) {
   for (var k in outUrl) 
     if(scope===true || scope===k) delete outUrl[k];
 }
 
-urlMapper.actionCopy = function actionCopy(scope, inUrl,outUrl) {
+pmMapper.actionCopy = function actionCopy(scope, inUrl,outUrl) {
   for (var k in inUrl) 
     if (scope===true || scope===k) {
       if (!outUrl[k]) outUrl[k] = [];
@@ -89,7 +89,7 @@ urlMapper.actionCopy = function actionCopy(scope, inUrl,outUrl) {
     }
 }
 
-urlMapper.map = function map(inUrl) {
+pmMapper.map = function map(inUrl) {
   var self = this;
   inUrl = this.parse(inUrl);
   var result = this.mappings.reduce(function(acc, mapping){
@@ -102,7 +102,7 @@ urlMapper.map = function map(inUrl) {
   return result;
 } 
 
-urlMapper.toString = function toString(url) {
+pmMapper.toString = function toString(url) {
   var result = "";
   var sep = "";
   for (var k in url) {
@@ -116,8 +116,8 @@ urlMapper.toString = function toString(url) {
 /*
 var url = 'sa=2,1,4&tn=6,7,3';
 
-urlMapper.mappings.push([{},{$copy:"tn"}]);
-urlMapper.mappings.push([{ $and: {sa : ["1","2"]}},{out:["55","53"]}]);
+pmMapper.mappings.push([{},{$copy:"tn"}]);
+pmMapper.mappings.push([{ $and: {sa : ["1","2"]}},{out:["55","53"]}]);
 
-console.log(urlMapper.toString(urlMapper.map(url)));
+console.log(pmMapper.toString(pmMapper.map(url)));
 */
