@@ -1,6 +1,6 @@
-# urlMapper
+# pmMapper
 
-The urlMapper helps to map an existing URL to a different URL.
+The pmMapper helps to map an existing URL to a different URL.
 
 ## Structure
 
