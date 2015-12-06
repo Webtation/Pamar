@@ -69,6 +69,8 @@ pmMapper.action = function action(action, inUrl, outUrl) {
     if (k[0]==='$') {
       if (k==='$clear') this.actionClear(action[i],outUrl);
       if (k==='$copy') this.actionCopy(action[k],inUrl,outUrl);
+      if (k==='$src') this.actionSrc(action[k],inUrl);
+      if (k==='$ssrc') this.actionSSrc(action[k],inUrl);
     } else {
       if (!outUrl.hasOwnProperty(k)) outUrl[k] = []; 
       outUrl[k] = outUrl[k].concat(action[k]);
@@ -89,6 +91,19 @@ pmMapper.actionCopy = function actionCopy(scope, inUrl,outUrl) {
     }
 }
 
+pmMapper.actionSrc = function actionSrc(item, inUrl) {
+  for (var name in item) break;
+  if (!inUrl[name]) inUrl[name] = [];
+  if (Array.isArray(inUrl[name])) 
+    inUrl[name].push(item[name]); 
+  else inUrl[name] = [ inUrl[name], item[name]];
+}
+
+pmMapper.actionSSrc = function actionSSrc (item, inUrl) {
+  for (var name in item) break;
+  inUrl[name] = item[name];
+}
+
 pmMapper.map = function map(inUrl) {
   var self = this;
   inUrl = this.parse(inUrl);
@@ -106,18 +121,75 @@ pmMapper.toString = function toString(url) {
   var result = "";
   var sep = "";
   for (var k in url) {
-    result+= sep + k + "=" + url[k].join(',');
+    if (Array.isArray(url[k]))
+      result+= sep + k + "=" + url[k].join(',');
+    else result+= sep + k + "=" + url[k];
     sep = "&";
   }
   return result;
 }
 
+pmMapper.acceptItem = function (input) {
+  if (typeof input === 'string' || input instanceof String) {
+    var terms = input.split(':');
+    for (var a = 0; a < terms.length; a++) terms[a] = terms[a].trim();
+    if (terms.length % 2) {
+      var result = {};
+      for (var a=1; a < terms.length; a+=2) result[terms[a]] = terms[a+1];
+      var outer = {};
+      outer[terms[0]] = result;
+      return outer;      
+    } else {       
+      var result = {};
+      for (var a=0; a < terms.length; a+=2) result[terms[a]] = terms[a+1];
+      return result;
+    }
+
+  } else return input;
+}
+
+pmMapper.accept = function (input) {
+  if (!input) return;
+  if (Array.isArray(input)) {
+    if (input.size===0) return;
+    var ps = [];
+    var self = this;
+    if (input.size===1) ps.push({});
+    input.forEach(function(item){
+      ps.push(self.acceptItem(item));
+    })
+    this.mappings.push(ps);
+  } else {
+    var terms = input.split(';');
+    this.accept(terms);
+  }
+}
+
 
 /*
-var url = 'sa=2,1,4&tn=6,7,3';
+var url = 'tn=1,3&sa=3';
 
 pmMapper.mappings.push([{},{$copy:"tn"}]);
 pmMapper.mappings.push([{ $and: {sa : ["1","2"]}},{out:["55","53"]}]);
+
+pmMapper.accept([{tn:'1'}, {$ssrc:{type:'normal'}} ]);
+pmMapper.accept('tn:1 ; $ssrc:type:normal');
+pmMapper.accept([{tn:'2'}, {$ssrc:{type:'short'}} ]);
+
+// 'tn:2;$ssrc:type:normal'
+
+pmMapper.accept(['tn:3', {$ssrc:{farbe:'blau'}} ]);
+pmMapper.accept([{tn:'4'}, {$ssrc:{farbe:'grau'}} ]);
+
+pmMapper.mappings.push([{$and:{farbe:'blau',type:'short'}}, {comp:'01_01'} ]);
+//pmMapper.mappings.push([{$and:{farbe:'blau',type:'normal'}}, {comp:'01_02'} ]);
+
+pmMapper.accept('$and : farbe : blau : type : normal   ; comp : 01_02');
+
+pmMapper.mappings.push([{},{$copy:'tn',sb:'3'}]);
+
+
+
 
 console.log(pmMapper.toString(pmMapper.map(url)));
 */
