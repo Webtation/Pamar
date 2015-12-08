@@ -65,17 +65,47 @@ pmMapper.checkEq = function checkEq(con, url, andFlag) {
 
 pmMapper.action = function action(action, inUrl, outUrl) {
   if (!action) return;
+  if (typeof action === 'boolean') return action;
   for (var k in action) {
     if (k[0]==='$') {
       if (k==='$clear') this.actionClear(action[i],outUrl);
       if (k==='$copy') this.actionCopy(action[k],inUrl,outUrl);
       if (k==='$src') this.actionSrc(action[k],inUrl);
       if (k==='$ssrc') this.actionSSrc(action[k],inUrl);
+      if (k==='$get') return this.actionGet(action[k],inUrl);
+      if (k==='$comp') return this.actionComp(this.contextAction(action[k], inUrl, outUrl));
     } else {
       if (!outUrl.hasOwnProperty(k)) outUrl[k] = []; 
-      outUrl[k] = outUrl[k].concat(action[k]);
+      outUrl[k] = outUrl[k].concat(this.contextAction(action[k], inUrl, outUrl));
     }
   }
+}
+
+pmMapper.contextAction = function contextAction(action, inUrl, outUrl) {
+  var self = this;
+  if (typeof action === 'string' || action instanceof String) return action;
+  else if (Array.isArray(action)) {
+    return action.reduce(function(acc, item){
+      acc.push(self.contextAction(item, inUrl, outUrl));
+      return acc;
+    },[]);
+  } else {
+    return this.action(action, inUrl, outUrl);
+  }
+
+
+}
+
+pmMapper.actionGet = function actionGet(name, inUrl) {
+  return inUrl[name];
+}
+
+pmMapper.actionComp = function actionComp(items) {
+  if (Array.isArray(items)) {
+    return items.reduce(function(acc,item){
+      return acc + item;
+    },'');
+  } else return items;
 }
 
 pmMapper.actionClear = function actionClear(scope, outUrl) {
@@ -129,19 +159,33 @@ pmMapper.toString = function toString(url) {
   return result;
 }
 
+pmMapper.subString = function (string) {
+  if (string.indexOf('@')<0) return string;
+  var terms = string.split('@');
+  var result = [];
+  var text = true;
+  terms.forEach(function(term){
+    if (text) result.push(term);
+    else result.push({$get:term});
+    text = !text;
+  })
+  return {$comp: result};
+
+}
+
 pmMapper.acceptItem = function (input) {
   if (typeof input === 'string' || input instanceof String) {
     var terms = input.split(':');
     for (var a = 0; a < terms.length; a++) terms[a] = terms[a].trim();
     if (terms.length % 2) {
       var result = {};
-      for (var a=1; a < terms.length; a+=2) result[terms[a]] = terms[a+1];
+      for (var a=1; a < terms.length; a+=2) result[terms[a]] = this.subString(terms[a+1]);
       var outer = {};
       outer[terms[0]] = result;
       return outer;      
     } else {       
       var result = {};
-      for (var a=0; a < terms.length; a+=2) result[terms[a]] = terms[a+1];
+      for (var a=0; a < terms.length; a+=2) result[terms[a]] = this.subString(terms[a+1]);
       return result;
     }
 
@@ -166,7 +210,7 @@ pmMapper.accept = function (input) {
 }
 
 
-/*
+
 var url = 'tn=1,3&sa=3';
 
 pmMapper.mappings.push([{},{$copy:"tn"}]);
@@ -186,10 +230,12 @@ pmMapper.mappings.push([{$and:{farbe:'blau',type:'short'}}, {comp:'01_01'} ]);
 
 pmMapper.accept('$and : farbe : blau : type : normal   ; comp : 01_02');
 
-pmMapper.mappings.push([{},{$copy:'tn',sb:'3'}]);
+//pmMapper.mappings.push([{},{$copy:'tn',sb:'3'}]);
+pmMapper.mappings.push([{},{test:{$comp:[{$get:'type'},'_',{$get:'farbe'}]}}]);
+
+pmMapper.accept('; muh : @tn@_@farbe@');
 
 
 
 
 console.log(pmMapper.toString(pmMapper.map(url)));
-*/
