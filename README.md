@@ -42,6 +42,8 @@ The else action can be omitted.
 
 ### Condition Object
 
+Unless otherwise specified, all conditions are checked against the input params.
+
 A single string is generally treated like an array with only a single string.
 
 As any parameter can have multiple values, a check for a single value returns true, if the value-list contains the value.
@@ -66,4 +68,15 @@ By default, all conditions are checked under the OR-assumption.  With the $and-o
 
 ```
 
+## Action object
 
+Unless otherwise specified, all actions are done to the output params.
+
+A single string is generally treated like an array with only a single string.
+
+```
+{}  // Empty action, does nothing.
+{foo : 'bar'}  or {foo : ['bar']} // adds 'bar' to the param 'foo'
+{foo : ['bar','box']}  // adds 'bar' AND 'box' to the param 'foo'
+{foo : 'bar', prod : 'test'}  // adds 'bar' to 'foo' and 'test' to 'prod'
+```
