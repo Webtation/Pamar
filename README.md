@@ -121,3 +121,9 @@ Same mapping rule
 - For condition and action, string is split at colon (:)
 - If even items, one object is created: { item0 : 'item1', item2 : 'item3' ...}
 - If odd items, one object is created with a nested object:  { item0 : { item1 : 'item2', item3 : 'item4'...}}
+- Items are split at ',' creating an array of strings
+
+```
+' $and : foo : bar,box '  // { $and : { foo : ['bar', 'box'] } }
+' $copy : * : $clear : test'  // { $copy : '*', $ clear : 'test' }
+```
