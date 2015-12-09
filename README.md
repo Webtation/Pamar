@@ -14,6 +14,23 @@ No special characters are allowed.
 Any parameter can have multiple values, seperated by a coma.
 If a parameter apears multiple times, it will be treated as a list of values for the same parameter.
 
+## Simple example
+
+```
+Input
+foo=bar&prod=test
+```
+
+```
+Mapping Rule
+[{ foo : 'bar'} , { test : ' pass', day : 'fri'}]
+```
+
+```
+Output
+test=pass&day=fri
+```
+
 ## Data model
 
 The pmMapper controls three data-collections.
