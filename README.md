@@ -125,5 +125,18 @@ Same mapping rule
 
 ```
 ' $and : foo : bar,box '  // { $and : { foo : ['bar', 'box'] } }
-' $copy : * : $clear : test'  // { $copy : '*', $ clear : 'test' }
+' $copy : * : $clear : test'  // { $copy : '*', $clear : 'test' }
 ```
+
+## Complex example
+
+Asume a remote-control toy-car.  The customer can chose different options, according to which different parts need to be ordered.
+
+- You can chose an SUV or sedan.  
+- They can come in three different color:  black, red, blue.
+- You can opt for GPS, the GPS module is for the SUV always black, for the sedan in colors : black, red, blue.
+- Opt all-wheel-drive needs special controls for remote
+- Lights package comes with head-lights and rear-lights, needs special controls for remote
+- You can chose between regular or extended battery (extended is heavier but provides more power)
+- You always get a standard charger
+
