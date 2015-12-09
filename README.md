@@ -135,10 +135,12 @@ Asume a remote-control toy-car.  The customer can chose different options, accor
 - You can chose an SUV or sedan.  
 - They can come in two different color:  black, red.
 - You can opt for GPS, the GPS module for the SUV is always black, for the sedan in colors : black or red.
-- Opt all-wheel-drive needs special controls for remote
-- Lights package comes with head-lights and rear-lights, needs special controls for remote
+- Option all-wheel-drive needs special controls for remote
+- Lights-package comes with head-lights and rear-lights, needs special controls for remote
+- You always get the correct remote
 - You can chose between regular or extended battery (extended is heavier but provides more power)
 - You always get a standard charger
+
 
 ```
 PRT#  DESCRIPTION
@@ -157,4 +159,10 @@ PRT#  DESCRIPTION
 4870  regular battery
 4871  extended battery
 5000  standard charger
+```
+
+- Following options are available:  suv, sedan, black, red, gps, awd, lights, regbat, extbat
+- The options will be provided with the param 'options'
+
+```
 ```
