@@ -41,16 +41,16 @@ The else action can be omitted.
 
 
 ### Condition Object
-(A single string is generally treated like an array with only a single string)
+
+A single string is generally treated like an array with only a single string.
+
+As any parameter can have multiple values, a check for a single value returns true, if the value-list contains the value.
+(Example months=jan,feb,may returns true for months : feb)
 
 ```
-{}
+{}  // Empty condition, always true.
+{foo : 'bar'}  or {foo : ['bar']} // True if it exists a param 'foo' with a value 'bar'
+{foo : 'bar', prod : 'test'}  // 
 ```
-Empty condition, always true.
 
-```
-{foo : 'bar'}  or {foo : ['bar']}
-{foo : 'bar', prod : 'test'}
-```
-True if it exists a param 'foo' with a value 'bar'
 
