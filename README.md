@@ -22,3 +22,10 @@ The pmMapper controls three data-collections.
 - Output params (the resulting query string, with every mapping process, a new output param object will be created)
 - Mapping rules (rules are inserted before mapping and will be applied during the mapping process)
 
+## Mapping process
+
+The mapping process parses the input params and creates an empty output params object.
+The process will then apply every mapping rule.
+
+The process returns the populated output params object.
+
