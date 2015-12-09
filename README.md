@@ -29,3 +29,13 @@ The process will then apply every mapping rule.
 
 The process returns the populated output params object.
 
+## Mapping Rule
+
+A mapping rule can have two or three components, provided as objects in an array
+
+```
+{condition object} , { action object} [,{ else action object}] 
+```
+
+The else action can be ommited.
+
