@@ -104,3 +104,20 @@ A single string is generally treated like an array with only a single string.
 { $clear : true} or { $clear : '*' }  // deletes all params from the output
 { $clear : 'foo'} or { $clear : ['foo'] }  // deletes the param 'foo' from the output
 ```
+
+## Short notation
+
+All mapping rules are difined in condition and action objects.  For convinience some mapping rules can be difined in strings.
+(Elements within the string will be trimmed.)
+
+```
+Same mapping rule
+[{ foo : 'bar' }, { test : 'pass' }]  // default syntax as objects
+[ ' foo : bar ' , ' test : pass ' ]  // using two strings
+' foo : bar ; test : pass '  // using one string, no array needed
+```
+
+- String is split at semi-colon (;) for condition and action object.
+- For condition and action, string is split at colon (:)
+- If even items, one object is created: { item0 : 'item1', item2 : 'item3' ...}
+- If odd items, one object is created with a nested object:  { item0 : { item1 : 'item2', item3 : 'item4'...}}
