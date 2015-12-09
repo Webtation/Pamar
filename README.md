@@ -133,10 +133,28 @@ Same mapping rule
 Asume a remote-control toy-car.  The customer can chose different options, according to which different parts need to be ordered.
 
 - You can chose an SUV or sedan.  
-- They can come in three different color:  black, red, blue.
-- You can opt for GPS, the GPS module is for the SUV always black, for the sedan in colors : black, red, blue.
+- They can come in two different color:  black, red.
+- You can opt for GPS, the GPS module for the SUV is always black, for the sedan in colors : black or red.
 - Opt all-wheel-drive needs special controls for remote
 - Lights package comes with head-lights and rear-lights, needs special controls for remote
 - You can chose between regular or extended battery (extended is heavier but provides more power)
 - You always get a standard charger
 
+```
+PRT#  DESCRIPTION
+1201  model suv with engine, black
+1202  model suv with engine, red
+1211  model sedan with engine, black
+1212  model sedan with engine, red
+5631  gps module, black
+5635  gps module, red
+2420  remote standard
+2421  remote with all-wheel-drive
+2422  remote with light-controls
+2423  remote with all-wheel-drive and light-controls
+2201  head-lights (fit both suv and sedan)
+2202  rear-lights (fit both suv and sedan)
+4870  regular battery
+4871  extended battery
+5000  standard charger
+```
