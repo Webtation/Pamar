@@ -49,8 +49,9 @@ As any parameter can have multiple values, a check for a single value returns tr
 
 ```
 {}  // Empty condition, always true.
-{foo : 'bar'}  or {foo : ['bar']} // True if it exists a param 'foo' with a value 'bar'
-{foo : 'bar', prod : 'test'}  // 
+{foo : 'bar'}  or {foo : ['bar']} // true for param 'foo' with a value 'bar'
+{foo : ['bar','box']}  // true for param 'foo' with value 'bar' OR 'box'
+{foo : 'bar', prod : 'test'}  // true for param 'foo' with 'bar' OR 'prod' with 'test'
 ```
 
 
