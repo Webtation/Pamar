@@ -1,6 +1,6 @@
-# pmMapper
+# Pamer
 
-The pmMapper helps to map an existing URL to a different URL, by transforming the query string (url parameters).
+Pamer helps to map an existing URL to a different URL, by transforming the query string (url parameters).
 
 ## URL query string
 
