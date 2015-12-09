@@ -134,11 +134,11 @@ Asume a remote-control toy-car.  The customer can chose different options, accor
 
 - You can chose an SUV or sedan.  
 - They can come in two different color:  black, red.
-- You can opt for GPS, the GPS module for the SUV is always black, for the sedan in colors : black or red.
+- You can opt for GPS, the GPS module for the SUV is always black, for the sedan in colors : black or red.  (measure lap times and speed, use smart-phone app to see tracks on google map)
 - Option all-wheel-drive needs special controls for remote
 - Lights-package comes with head-lights and rear-lights, needs special controls for remote
 - You always get the correct remote
-- You can chose between regular or extended battery (extended is heavier but provides more power)
+- You can chose between regular or extended battery (extended is heavier but provides more power, if no battery is specified, you get the regular battery (default))
 - You always get a standard charger
 
 
@@ -172,4 +172,24 @@ opt=suv,red,gps,lights,regbat
 
 Example output
 parts=1202,5631,2201,2202,2422,4870,5000&transport=package
+```
+
+### Mapping rules
+
+```
+[
+  ' $and : opt : suv  , black ; parts : 1201',
+  ' $and : opt : suv  , red   ; parts : 1202',
+  ' $and : opt : sedan, black ; parts : 1203',
+  ' $and : opt : sedan, red   ; parts : 1204',
+  [ {$and: { opt:'gps',$or:{opt:['black','suv']}}} , 'parts : 5631'],
+  ' $and : opt : sedan, red, gps  ;  parts : 5635',
+  ' $not : opt : awd, lights ;  parts : 2420',
+  [ {$and: { opt : awd, $not :{ opt : lights}}}, ' parts: 2421'],
+  [ {$and: { opt : lights, $not :{ opt : awd}}}, ' parts: 2422'],
+  ' $and : opt : awd, lights ; parts : 2423',
+  ' opt : lights ; parts : 2201, 2202',
+  ' opt : extbat ; parts : 4871 ; parts : 4870',
+  ' ; parts : 5000'
+]
 ```
