@@ -37,5 +37,20 @@ A mapping rule can have two or three components, provided as objects in an array
 {condition object} , { action object} [,{ else action object}] 
 ```
 
-The else action can be ommited.
+The else action can be omitted.
+
+
+### Condition Object
+(A single string is generally treated like an array with only a single string)
+
+```
+{}
+```
+Empty condition, always true.
+
+```
+{foo : 'bar'}  or {foo : ['bar']}
+{foo : 'bar', prod : 'test'}
+```
+True if it exists a param 'foo' with a value 'bar'
 
