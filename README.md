@@ -47,11 +47,23 @@ A single string is generally treated like an array with only a single string.
 As any parameter can have multiple values, a check for a single value returns true, if the value-list contains the value.
 (Example months=jan,feb,may returns true for months : feb)
 
+By default, all conditions are checked under the OR-assumption.  With the $and-operator it can be changed to AND.
+
 ```
 {}  // Empty condition, always true.
 {foo : 'bar'}  or {foo : ['bar']} // true for param 'foo' with a value 'bar'
 {foo : ['bar','box']}  // true for param 'foo' with value 'bar' OR 'box'
 {foo : 'bar', prod : 'test'}  // true for param 'foo' with 'bar' OR 'prod' with 'test'
+```
+
+
+```
+{ $or :  { remaining condition } }  // remaining condition will be under OR-assumption (default behavior)
+{ $and:  { remaining condition } }  // remaining condition will be under AND-assumption
+
+{ $and :  { day : 'sun', prod : 'test'}}  // true for param 'day' with 'sun' AND 'prod' with 'test'
+{ $and :  { day : ['sun','mon']}  // true for param 'day' with value 'sun' AND 'mon'
+
 ```
 
 
