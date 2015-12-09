@@ -97,3 +97,10 @@ A single string is generally treated like an array with only a single string.
 {foo : ['bar','box']}  // adds 'bar' AND 'box' to the param 'foo'
 {foo : 'bar', prod : 'test'}  // adds 'bar' to 'foo' and 'test' to 'prod'
 ```
+
+```
+{ $copy : true} or { $copy : '*' }  // copies all params from the input to the output
+{ $copy : 'foo'} or { $copy : ['foo'] }  // copies the param 'foo' from the input to the output
+{ $clear : true} or { $clear : '*' }  // deletes all params from the output
+{ $clear : 'foo'} or { $clear : ['foo'] }  // deletes the param 'foo' from the output
+```
