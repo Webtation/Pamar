@@ -163,6 +163,13 @@ PRT#  DESCRIPTION
 
 - Following options are available:  suv, sedan, black, red, gps, awd, lights, regbat, extbat
 - The options will be provided with the param 'options'
+- The output needs the partnumbers in 'parts'
+- The output also needs a parameter 'transport' set to 'package'
 
 ```
+Example input
+opt=suv,red,gps,lights,regbat
+
+Example output
+parts=1202,5631,2201,2202,2422,4870,5000&transport=package
 ```
