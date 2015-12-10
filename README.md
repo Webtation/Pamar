@@ -1,6 +1,6 @@
-# Pamer
+# Pamar
 
-Pamer helps to map an existing URL to a different URL, by transforming the query string (url parameters).
+Pamar helps to map an existing URL to a different URL, by transforming the query string (url parameters).
 
 ## URL query string
 
