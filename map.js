@@ -43,6 +43,7 @@ Pamar.prototype.check = function check(url, obj, andFlag, nameCB) {
       if (k==='$or')  cfunc(this.checkAndOr,false);
       if (k==='$and') cfunc(this.checkAndOr,true);
       if (k==='$eq')  cfunc(this.checkEq);
+      if (k==='$not') cfunc(this.checkNot);
       if (k==='$bool') cfunc(this.checkBool);
       if (k==='$clear') cfunc(this.actionClear);
       if (k==='$copy') cfunc(this.actionCopy);
@@ -120,17 +121,15 @@ Pamar.prototype.actionSrc = function actionSrc(url, obj) {
 }
 
 
-
-
-
 Pamar.prototype.checkEq = function checkEq(url, obj) {
   for (var i = 1; i < obj.length; i++ )
     if (obj[i]!==obj[0]) return false;
   return true;
 }
 
-
-
+Pamar.prototype.checkNot = function checkEq(url, obj, andFlag) {
+  return !this.checkAndOr(url, obj, andFlag);
+}
 
 
 Pamar.prototype.actionComp = function actionComp(url, obj) {
@@ -165,13 +164,15 @@ Pamar.prototype.map = function map(inUrl) {
   var url = {};
   url.in = this.parse(inUrl);
   url.out = {};
-  var result = this.mappings.reduce(function(acc, mapping){
+  for (var i = 0; i < this.mappings.length; i++) {
+    var mapping = this.mappings[i];
     if (!Array.isArray(mapping) || mapping.length<2) return acc;
     if (self.checkAndOr(url, self.check(url, mapping[0],false, self.conNameCheck.bind(self)), false)) 
       self.check(url, mapping[1],true, self.actionNameCheck.bind(self)); 
     else self.check(url, mapping[2],true, self.actionNameCheck.bind(self)); 
-    return acc;
-  },{});
+  }
+    
+  url.outStr = this.toString(url.out);
   return url;
 } 
 
@@ -201,6 +202,14 @@ Pamar.prototype.subString = function subString(string) {
 
 }
 
+Pamar.prototype.splitItem = function(string) {
+  var items = string.split(',');
+  for (var i = 0; i < items.length; i++)
+    items[i] = this.subString(items[i].trim());
+  return items;
+
+}
+
 Pamar.prototype.acceptItem = function acceptItem(input) {
   if (typeof input === 'string' || input instanceof String) {
     if (input.trim()==='') return {};
@@ -208,13 +217,13 @@ Pamar.prototype.acceptItem = function acceptItem(input) {
     for (var a = 0; a < terms.length; a++) terms[a] = terms[a].trim();
     if (terms.length % 2) {
       var result = {};
-      for (var a=1; a < terms.length; a+=2) result[terms[a]] = this.subString(terms[a+1]);
+      for (var a=1; a < terms.length; a+=2) result[terms[a]] = this.splitItem(terms[a+1]);
       var outer = {};
       outer[terms[0]] = result;
       return outer;      
     } else {       
       var result = {};
-      for (var a=0; a < terms.length; a+=2) result[terms[a]] = this.subString(terms[a+1]);
+      for (var a=0; a < terms.length; a+=2) result[terms[a]] = this.splitItem(terms[a+1]);
       return result;
     }
 
@@ -238,20 +247,39 @@ Pamar.prototype.accept = function accept(input) {
   }
 }
 
+Pamar.prototype.acceptAll = function acceptAll(mappings) {
+  for (var i = 0; i < mappings.length; i++)
+    this.accept(mappings[i]);
+}
+
 exports = Pamar;
 
 /*
+var url = 'opt=suv,red,gps,lights,regbat';
 
-var url = 'tn=1,3&sa=3';
-var mp = new Pamar();
+var pm = new Pamar;
+
+pm.acceptAll([
+  ' $and : opt : suv  , black ; parts : 1201',
+  ' $and : opt : suv  , red   ; parts : 1202',
+  ' $and : opt : sedan, black ; parts : 1203',
+  ' $and : opt : sedan, red   ; parts : 1204',
+  [ {$and: { opt:'gps',$or:{opt:['black','suv']}}} , 'parts : 5631'],
+  ' $and : opt : sedan, red, gps  ;  parts : 5635',
+  ' $not : opt : awd, lights ;  parts : 2420',
+  [ {$and: { opt : 'awd', $not :{ opt : 'lights'}}}, ' parts: 2421'],
+  [ {$and: { opt : 'lights', $not :{ opt : 'awd'}}}, ' parts: 2422'],
+  ' $and : opt : awd, lights ; parts : 2423',
+  ' opt : lights ; parts : 2201, 2202',
+  ' opt : extbat ; parts : 4871 ; parts : 4870',
+  ' ; parts : 5000',
+  ' ; transport : package'
+]
+)
 
 
-mp.accept([{tn : {$src : 'sa'}},{na : ['1','2']}]);
-mp.accept([{},{na:'test'}]);
-var out;
-for (var i = 0; i <1000000; i++)
-  out = mp.map(url);
 
-console.log(out.in);
-console.log(out.out);
+var ret = pm.map(url);
+
+console.log(ret.outStr);
 */
