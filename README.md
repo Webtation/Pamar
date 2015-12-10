@@ -171,7 +171,7 @@ Example input
 opt=suv,red,gps,lights,regbat
 
 Example output
-parts=1202,5631,2201,2202,2422,4870,5000&transport=package
+parts=1202,5631,2422,2201,2202,4870,5000&transport=package
 ```
 
 ### Mapping rules
@@ -185,11 +185,12 @@ parts=1202,5631,2201,2202,2422,4870,5000&transport=package
   [ {$and: { opt:'gps',$or:{opt:['black','suv']}}} , 'parts : 5631'],
   ' $and : opt : sedan, red, gps  ;  parts : 5635',
   ' $not : opt : awd, lights ;  parts : 2420',
-  [ {$and: { opt : awd, $not :{ opt : lights}}}, ' parts: 2421'],
-  [ {$and: { opt : lights, $not :{ opt : awd}}}, ' parts: 2422'],
+  [ {$and: { opt : 'awd', $not :{ opt : 'lights'}}}, ' parts: 2421'],
+  [ {$and: { opt : 'lights', $not :{ opt : 'awd'}}}, ' parts: 2422'],
   ' $and : opt : awd, lights ; parts : 2423',
   ' opt : lights ; parts : 2201, 2202',
   ' opt : extbat ; parts : 4871 ; parts : 4870',
-  ' ; parts : 5000'
+  ' ; parts : 5000',
+  ' ; transport : package'
 ]
 ```
