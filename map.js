@@ -7,6 +7,23 @@ Pamar.prototype.constructor = Pamar;
 
 
 
+Pamar.prototype.map = function map(inUrl) {
+  var self = this;
+  var url = {};
+  url.in = this.parse(inUrl);
+  url.out = {};
+  for (var i = 0; i < this.mappings.length; i++) {
+    var mapping = this.mappings[i];
+    if (!Array.isArray(mapping) || mapping.length<2) return acc;
+    if (self.checkAndOr(url, self.check(url, mapping[0],false, self.conditionNCB.bind(self)), false)) 
+      self.check(url, mapping[1],true, self.actionNCB.bind(self)); 
+    else self.check(url, mapping[2],true, self.actionNCB.bind(self)); 
+  }
+    
+  url.outStr = this.formatUrl(url.out);
+  return url;
+} 
+
 
 Pamar.prototype.parse = function parse(url) {
 
@@ -22,69 +39,51 @@ Pamar.prototype.parse = function parse(url) {
 
 }
 
+Pamar.prototype.formatUrl = function formatUrl(url) {
+  var result = "";
+  var sep = "";
+  for (var k in url) {
+    if (Array.isArray(url[k]))
+      result+= sep + k + "=" + url[k].join(',');
+    else result+= sep + k + "=" + url[k];
+    sep = "&";
+  }
+  return result;
+}
+
 
 
 Pamar.prototype.check = function check(url, obj, andFlag, nameCB) {
   if (!obj) return true;
-  var self = this;
+  var scheck = this.check.bind(this);
+  //nameCB = nameCB.bind(this);
   if (typeof obj === 'string' || obj instanceof String) return [obj];
   if (Array.isArray(obj)) return obj.reduce(function(acc,item){
-    acc.push(self.check(url, item, andFlag, nameCB)[0]);
+    acc.push(scheck(url, item, andFlag, nameCB)[0]);
     return acc;
   },[])
   var result = [];
-  var cfunc = function (command, flag, ncb) {
-    if (flag===undefined) flag = andFlag;
-    if (ncb) ncb = ncb.bind(self); else ncb = nameCB;
-    return result.push(command.bind(self, url, self.check(url, obj[k], flag, ncb), flag)());
-  }
+  
   for (var k in obj) {
    if (k[0]==='$') {
-      if (k==='$or')  cfunc(this.checkAndOr,false);
-      if (k==='$and') cfunc(this.checkAndOr,true);
-      if (k==='$eq')  cfunc(this.checkEq);
-      if (k==='$not') cfunc(this.checkNot);
-      if (k==='$bool') cfunc(this.checkBool);
-      if (k==='$clear') cfunc(this.actionClear);
-      if (k==='$copy') cfunc(this.actionCopy);
-      if (k==='$src') cfunc(this.actionSrc, andFlag, this.srcNameCheck);
-      if (k==='$ssrc') cfunc(this.actionSrc, andFlag, this.ssrcNameCheck);
-      if (k==='$comp') cfunc(this.actionComp);
-    } else {
-      result.push ( nameCB(url, k, this.check(url, obj[k], andFlag, nameCB), andFlag));
+
+      var command = this.commands[k];
+      var flag = andFlag;
+      if (command.flag !== undefined) flag = command.flag;
+      var ncb = nameCB;
+      if (command.ncb) ncb = command.ncb.bind(this);
+
+      result.push( command.func.bind(this, url, scheck(url, obj[k], flag, ncb), flag)());
+      
+      } else {
+      result.push ( nameCB(url, k, scheck(url, obj[k], andFlag, nameCB), andFlag));
     }
   }
   return result;
 
 }
 
-
-
-
-Pamar.prototype.arrayCheck = function arrayCheck(src, lookup, andFlag) {
-  andFlag = !!andFlag;
-  if (Array.isArray(lookup)) {
-    for (var i = 0; i < lookup.length; i++)
-      if ((src.indexOf(lookup[i])<0) === andFlag) return !andFlag;
-    return andFlag;
-  } else return (src.indexOf(lookup) >=0);
-}
-
-Pamar.prototype.checkBool = function checkBool(url, obj) {
-  if (obj===false || obj==='0' || obj==='false') return false;
-  return true;
-}
-
-Pamar.prototype.checkAndOr = function checkAndOr(url, obj, andFlag) {
-  if (obj.length===0) return true;
-  var self = this;
-  return obj.reduce(function(acc,item){
-    if (acc!==andFlag) return acc;
-    return self.checkBool(url, item);
-  }, andFlag);
-}
-
-Pamar.prototype.conNameCheck = function conNameCheck(url, name, obj, andFlag) {
+Pamar.prototype.conditionNCB = function conditionNCB(url, name, obj, andFlag) {
   var src = url.in[name];
   if (!src) return false;
   for (var i = 0; i < obj.length; i++)
@@ -93,7 +92,7 @@ Pamar.prototype.conNameCheck = function conNameCheck(url, name, obj, andFlag) {
 
 }
 
-Pamar.prototype.actionNameCheck = function actionNameCheck(url, name, obj, andFlag) {
+Pamar.prototype.actionNCB = function actionNCB(url, name, obj, andFlag) {
   if (!url.out[name]) url.out[name] = [];
   obj.forEach(function(item){
     url.out[name].push(item);
@@ -101,7 +100,7 @@ Pamar.prototype.actionNameCheck = function actionNameCheck(url, name, obj, andFl
   return true;
 }
 
-Pamar.prototype.srcNameCheck = function srcNameCheck(url, name, obj, andFlag) {
+Pamar.prototype.srcNCB = function srcNCB(url, name, obj, andFlag) {
   if (!url.in[name]) url.in[name] = [];
   obj.forEach(function(item){
     url.in[name].push(item);
@@ -109,17 +108,33 @@ Pamar.prototype.srcNameCheck = function srcNameCheck(url, name, obj, andFlag) {
   return true;
 }
 
-Pamar.prototype.ssrcNameCheck = function ssrcNameCheck(url, name, obj, andFlag) {
-  if (obj.length === 0) return;
+Pamar.prototype.ssrcNCB = function ssrcNCB(url, name, obj, andFlag) {
+  if (obj.length === 0) return true;
   url.in[name] = [ obj[obj.length-1]]; 
   return true;
 }
 
-Pamar.prototype.actionSrc = function actionSrc(url, obj) {
-  if (url.in[obj[0]]) return url.in[obj[0]][0];
+Pamar.prototype.renameNCB = function reNameNCB(url, name, obj, andFlag) {
+  var des = obj[0];
+  url.out[des] = url.out[name];
+  delete url.out[name];
   return true;
 }
 
+
+Pamar.prototype.checkBool = function checkBool(url, obj) {
+  if (obj===false || obj==='0' || obj==='false') return false;
+  return true;
+}
+
+Pamar.prototype.checkAndOr = function checkAndOr(url, obj, andFlag) {
+  if (obj.length===0) return true;
+  return obj.reduce(function(acc,item){
+    if (acc!==andFlag) return acc;
+    if (item===false || item==='0' || item==='false') return false;
+    return true;
+  }, andFlag);
+}
 
 Pamar.prototype.checkEq = function checkEq(url, obj) {
   for (var i = 1; i < obj.length; i++ )
@@ -127,10 +142,14 @@ Pamar.prototype.checkEq = function checkEq(url, obj) {
   return true;
 }
 
-Pamar.prototype.checkNot = function checkEq(url, obj, andFlag) {
+Pamar.prototype.checkNot = function checkNot(url, obj, andFlag) {
   return !this.checkAndOr(url, obj, andFlag);
 }
 
+Pamar.prototype.actionSrc = function actionSrc(url, obj) {
+  if (url.in[obj[0]]) return url.in[obj[0]][0];
+  return true;
+}
 
 Pamar.prototype.actionComp = function actionComp(url, obj) {
   return obj.reduce(function(acc, item){
@@ -155,38 +174,11 @@ Pamar.prototype.actionCopy = function actionCopy(url, obj) {
   })
 }
 
-
-
-
-
-Pamar.prototype.map = function map(inUrl) {
-  var self = this;
-  var url = {};
-  url.in = this.parse(inUrl);
-  url.out = {};
-  for (var i = 0; i < this.mappings.length; i++) {
-    var mapping = this.mappings[i];
-    if (!Array.isArray(mapping) || mapping.length<2) return acc;
-    if (self.checkAndOr(url, self.check(url, mapping[0],false, self.conNameCheck.bind(self)), false)) 
-      self.check(url, mapping[1],true, self.actionNameCheck.bind(self)); 
-    else self.check(url, mapping[2],true, self.actionNameCheck.bind(self)); 
-  }
-    
-  url.outStr = this.toString(url.out);
-  return url;
-} 
-
-Pamar.prototype.toString = function toString(url) {
-  var result = "";
-  var sep = "";
-  for (var k in url) {
-    if (Array.isArray(url[k]))
-      result+= sep + k + "=" + url[k].join(',');
-    else result+= sep + k + "=" + url[k];
-    sep = "&";
-  }
-  return result;
+Pamar.prototype.actionRename = function actionRename (url, obj, andFlag) {
+  return true;
 }
+
+
 
 Pamar.prototype.subString = function subString(string) {
   if (string.indexOf('@')<0) return string;
@@ -195,7 +187,7 @@ Pamar.prototype.subString = function subString(string) {
   var text = true;
   terms.forEach(function(term){
     if (text) result.push(term);
-    else result.push({$get:term});
+    else result.push({$src:term});
     text = !text;
   })
   return {$comp: result};
@@ -252,10 +244,34 @@ Pamar.prototype.acceptAll = function acceptAll(mappings) {
     this.accept(mappings[i]);
 }
 
+
+
+Pamar.prototype.commands = {
+
+  $or       : { func : Pamar.prototype.checkAndOr, flag : false },
+  $and      : { func : Pamar.prototype.checkAndOr, flag : true },
+  $eq       : { func : Pamar.prototype.checkEq },
+  $not      : { func : Pamar.prototype.checkNot },
+  $bool     : { func : Pamar.prototype.checkBool },
+  $clear    : { func : Pamar.prototype.actionClear },
+  $copy     : { func : Pamar.prototype.actionCopy },
+  $comp     : { func : Pamar.prototype.actionComp },
+  $src      : { func : Pamar.prototype.actionSrc, ncb : Pamar.prototype.srcNCB },
+  $ssrc     : { func : Pamar.prototype.actionSrc, ncb : Pamar.prototype.ssrcNCB },
+  $rename   : { func : Pamar.prototype.actionRename, ncb : Pamar.prototype.renameNCB }
+
+}
+
 exports = Pamar;
 
-/*
 var url = 'opt=suv,red,gps,lights,regbat';
+
+var test = { $hash : { opt : { suv : {}, red:''}} }
+
+'#h1:red# ; color:red';
+'#h1:blue# ; color:blue';
+
+'#h1$opt#'
 
 var pm = new Pamar;
 
@@ -279,7 +295,10 @@ pm.acceptAll([
 
 
 
+
+
+
 var ret = pm.map(url);
 
 console.log(ret.outStr);
-*/
+
