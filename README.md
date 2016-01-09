@@ -194,3 +194,7 @@ parts=1202,5631,2422,2201,2202,4870,5000&transport=package
   ' ; transport : package'
 ]
 ```
+
+### Reference
+
+Pamar is used in www.slidebaker.com in order to map product logic to image logic.  This way, the complex image building logic is hidden from a system, that only works with the product itself.
